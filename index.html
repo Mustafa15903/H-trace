@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>H-trace</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+html,body{
+  width:100%;height:100%;
+  background:#000;
+  color:#e8e8e8;
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:300;
+  overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* scanlines */
+body::after{
+  content:'';
+  position:fixed;inset:0;
+  background:repeating-linear-gradient(
+    to bottom,
+    transparent 0px,transparent 3px,
+    rgba(100, 99, 99, 0.15) 3px,rgba(0,0,0,.15) 4px
+  );
+  pointer-events:none;z-index:100;
+}
+
+/* noise */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:99;opacity:.55;
+}
+
+.terminal{
+  position:relative;
+  z-index:10;
+  width:560px;
+  max-width:90%;
+  padding:24px;
+}
+
+.header{
+  font-size:9px;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:#686060;
+  margin-bottom:32px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.header::before,
+.header::after{
+  content:'';
+  flex:1;
+  height:1px;
+  background:#544f4f;
+}
+
+.line{
+  display:flex;
+  align-items:center;
+  margin-bottom:14px;
+  font-size:13px;
+  line-height:1.8;
+}
+
+.prompt{
+  color:#7e7878;
+  margin-right:8px;
+}
+
+.label{
+  color:#ddd;
+}
+
+input{
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#fff;
+  font-family:inherit;
+  font-size:13px;
+  width:100%;
+  caret-color:#aaa;
+}
+
+/* blinking block cursor */
+.cursor{
+  display:inline-block;
+  width:8px;
+  height:14px;
+  background:#868282;
+  margin-left:4px;
+  animation:blink 1s step-start infinite;
+}
+
+@keyframes blink{
+  0%,100%{opacity:1}
+  50%{opacity:0}
+}
+
+.footer{
+  font-size:9px;
+  letter-spacing:.06em;
+  color:#1a1a1a;
+  margin-top:32px;
+}
+
+.fade-in{
+  opacity:0;
+  animation:rise .6s ease forwards;
+}
+
+@keyframes rise{
+  from{opacity:0;transform:translateY(6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+</style>
+</head>
+
+<body>
+
+<div class="terminal">
+
+  <div class="header fade-in" style="animation-delay:.2s;">
+    secure terminal — session init
+  </div>
+
+  <div class="line fade-in" style="animation-delay:.6s;">
+    <span class="prompt">guest@system:~$</span>
+    <span class="label">enter your name</span>
+  </div>
+
+  <div class="line fade-in" style="animation-delay:1.1s;">
+    <span class="prompt">guest@system:~$</span>
+    <input type="text" id="userNameInput" autofocus autocomplete="off">
+  </div>
+
+  <div class="footer fade-in" style="animation-delay:1.8s;">
+    awaiting input · clearance level: guest
+  </div>
+
+</div>
+
+<script src="storage.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

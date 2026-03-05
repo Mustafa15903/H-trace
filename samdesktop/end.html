@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>H-trace</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&display=swap');
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      background: #000;
+      color: #e8e8e8;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 300;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* scanlines */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(to bottom,
+          transparent 0px, transparent 3px,
+          rgba(0, 0, 0, .15) 3px, rgba(0, 0, 0, .15) 4px);
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* noise */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 99;
+      opacity: .55;
+    }
+
+    .page {
+      position: relative;
+      z-index: 10;
+      max-width: 560px;
+      width: 90%;
+      padding: 0 16px;
+    }
+
+    /* === YES path (default) === */
+    .end-yes {
+      display: none;
+    }
+
+    .end-no {
+      display: none;
+    }
+
+    /* stamp */
+    .stamp {
+      font-size: 9px;
+      color: #2a2a2a;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      margin-bottom: 36px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stamp::before {
+      content: '';
+      display: block;
+      flex: 1;
+      height: 1px;
+      background: #111;
+    }
+
+    .stamp::after {
+      content: '';
+      display: block;
+      flex: 1;
+      height: 1px;
+      background: #111;
+    }
+
+    /* badge */
+    .badge {
+      font-size: 9px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: #1a1a1a;
+      margin-bottom: 20px;
+    }
+
+    /* days passed */
+    .days-block {
+      margin-bottom: 32px;
+    }
+
+    .days-label {
+      font-size: 9px;
+      color: #333;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .days-value {
+      font-size: 40px;
+      font-weight: 500;
+      color: #1c1c1c;
+      letter-spacing: -.02em;
+      line-height: 1;
+    }
+
+    .days-unit {
+      font-size: 11px;
+      color: #2a2a2a;
+      margin-top: 4px;
+      letter-spacing: .1em;
+    }
+
+    /* main message */
+    .msg-block {
+      margin-bottom: 36px;
+    }
+
+    .msg-line {
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 2;
+      color: #ddd;
+      opacity: 0;
+      animation: rise .7s ease forwards;
+    }
+
+    .msg-line.dim {
+      color: #555;
+      font-size: 11px;
+    }
+
+    .msg-line.name {
+      color: #fff;
+      font-weight: 500;
+      font-size: 16px;
+    }
+
+    .msg-line.small {
+      color: #444;
+      font-size: 10px;
+      margin-top: 8px;
+      letter-spacing: .04em;
+    }
+
+    .msg-line.praise {
+      color: #aaa;
+      font-size: 12px;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(8px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .d1 {
+      animation-delay: .3s
+    }
+
+    .d2 {
+      animation-delay: .9s
+    }
+
+    .d3 {
+      animation-delay: 1.6s
+    }
+
+    .d4 {
+      animation-delay: 2.4s
+    }
+
+    .d5 {
+      animation-delay: 3.3s
+    }
+
+    .d6 {
+      animation-delay: 4.3s
+    }
+
+    .d7 {
+      animation-delay: 5.4s
+    }
+
+    .d8 {
+      animation-delay: 6.2s
+    }
+
+    .d9 {
+      animation-delay: 7.0s
+    }
+
+    /* divider */
+    .divider {
+      border: none;
+      border-top: 1px solid #111;
+      margin: 28px 0;
+      opacity: 0;
+      animation: rise .4s ease forwards;
+    }
+
+    /* case closed badge */
+    .case-badge {
+      display: inline-block;
+      border: 1px solid #1e1e1e;
+      padding: 4px 14px;
+      font-size: 9px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: #222;
+      margin-top: 16px;
+      opacity: 0;
+      animation: rise .5s ease forwards;
+    }
+
+    /* ref line */
+    .ref {
+      font-size: 9px;
+      color: #1a1a1a;
+      letter-spacing: .06em;
+      margin-top: 32px;
+      opacity: 0;
+      animation: rise .4s ease forwards;
+    }
+
+    /* === NO path === */
+    .no-label {
+      font-size: 9px;
+      color: #2a2a2a;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+
+    .no-title {
+      font-size: 22px;
+      font-weight: 400;
+      color: #333;
+      margin-bottom: 20px;
+      line-height: 1.4;
+      opacity: 0;
+      animation: rise .7s .2s ease forwards;
+    }
+
+    .no-body {
+      font-size: 11px;
+      color: #2a2a2a;
+      line-height: 2;
+      opacity: 0;
+      animation: rise .7s .8s ease forwards;
+    }
+
+    .no-ref {
+      font-size: 9px;
+      color: #111;
+      letter-spacing: .06em;
+      margin-top: 32px;
+      opacity: 0;
+      animation: rise .4s 2s ease forwards;
+    }
+
+    /* cursor blink */
+    .cur::after {
+      content: '█';
+      animation: blink .9s step-start infinite;
+      color: #222;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="page">
+
+    <!-- YES ENDING -->
+    <div class="end-yes" id="end-yes">
+      <div class="stamp">case file — INC-1996-0316</div>
+
+      <div class="days-block">
+        <div class="days-label">elapsed since report</div>
+        <div class="days-value">03</div>
+        <div class="days-unit">days</div>
+      </div>
+
+      <div class="msg-block">
+        <div class="msg-line d1">Thank you.</div>
+        <div class="msg-line dim d2">Three days after your report —</div>
+        <div class="msg-line d3">Thank you, <span class="name" id="player-name">—</span>.</div>
+        <div class="msg-line praise d4">We found the killer.</div>
+        <div class="msg-line dim d5">balla was arrested at 03:41 AM.</div>
+        <div class="msg-line dim d6">The evidence you discovered was more than sufficient.</div>
+        <div class="msg-line praise d7">This was possible because of you alone.</div>
+        <div class="msg-line small d8">Thank you very much.</div>
+      </div>
+
+      <hr class="divider d8" />
+
+      <div class="case-badge d9">✓ Case Closed — CASE CLOSED</div>
+
+      <div class="ref d9" style="animation-delay:7.8s;">
+        report filed by: <span id="ref-name">—</span> · INC-1996-0316 · status: RESOLVED
+        <span class="cur"></span>
+      </div>
+    </div>
+
+    <!-- NO ENDING -->
+    <div class="end-no" id="end-no">
+      <div class="no-label cur">session terminated — no action taken</div>
+      <div class="no-title">You chose silence.</div>
+      <div class="no-body">
+        The case remains unsolved.<br>
+        balla is still at large.<br><br>
+        You could have stopped him.<br>
+        You could have ended all of this.<br><br>
+        <span style="color:#111;">But you didn’t.</span>
+      </div>
+      <div class="no-ref">INC-1996-0316 · status: UNRESOLVED · filed: 0 reports</div>
+    </div>
+
+  </div>
+
+
+  <script src="../storage.js"></script>
+  <script src="end.js"></script>
+</body>
+
+</html>

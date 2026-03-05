@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Desktop</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #ffffff;
+      --bg2: #f5f5f5;
+      --bg3: #ededed;
+      --line: #d0d0d0;
+      --line2: #b0b0b0;
+      --text: #111111;
+      --dim: #666666;
+      --dimmer: #aaaaaa;
+      --ink: #000000;
+      --mono: 'IBM Plex Mono', monospace;
+      --sans: 'IBM Plex Sans', sans-serif;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      font-family: var(--sans);
+      font-weight: 300;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 12px;
+      overflow: hidden;
+    }
+
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 32px 32px;
+      opacity: .45;
+    }
+
+    /* Menubar */
+    .menubar {
+      position: relative;
+      z-index: 200;
+      height: 26px;
+      background: var(--ink);
+      border-bottom: 1px solid #333;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+    }
+
+    .mb-logo {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: #fff;
+      margin-right: 14px;
+    }
+
+    .mb-item {
+      padding: 0 9px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      font-size: 11px;
+      color: rgba(255, 255, 255, .75);
+      cursor: pointer;
+      transition: background .1s;
+    }
+
+    .mb-item:hover {
+      background: rgba(255, 255, 255, .1);
+    }
+
+    .mb-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .mb-clock {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: rgba(255, 255, 255, .55);
+    }
+
+    .ws-pill {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .ws-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .2);
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    .ws-dot.on {
+      background: #fff;
+    }
+
+    /* Desktop */
+    .desktop-area {
+      position: relative;
+      z-index: 1;
+      height: calc(100vh - 26px - 54px);
+      overflow: hidden;
+    }
+
+    /* Icons */
+    .icon-col {
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .dicon {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 5px 8px;
+      border-radius: 3px;
+      transition: background .12s;
+      width: 120px;
+    }
+
+    .dicon:hover {
+      background: rgba(0, 0, 0, .06);
+    }
+
+    .dicon-img {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .dicon-label {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text);
+    }
+
+    /* Windows */
+    .win {
+      position: absolute;
+      display: none;
+      flex-direction: column;
+      background: var(--bg);
+      border: 1px solid var(--ink);
+      box-shadow: 4px 4px 0 var(--ink);
+      min-width: 320px;
+      overflow: hidden;
+    }
+
+    .win.open {
+      display: flex;
+      animation: winopen .15s ease;
+    }
+
+    @keyframes winopen {
+      from {
+        opacity: 0;
+        transform: scale(.97)
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1)
+      }
+    }
+
+    .win-bar {
+      height: 30px;
+      background: var(--ink);
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      gap: 8px;
+      cursor: move;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .traffic-lights {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .tl {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, .2);
+      transition: opacity .15s;
+    }
+
+    .tl:hover {
+      opacity: .7;
+    }
+
+    .tl-close {
+      background: #fff;
+    }
+
+    .tl-min {
+      background: #777;
+    }
+
+    .tl-max {
+      background: #777;
+    }
+
+    .win-title {
+      flex: 1;
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: rgba(255, 255, 255, .6);
+      letter-spacing: .1em;
+      pointer-events: none;
+      text-transform: uppercase;
+    }
+
+    .win-menu {
+      display: flex;
+      padding: 0 8px;
+      border-bottom: 1px solid var(--line);
+      background: var(--bg2);
+      flex-shrink: 0;
+    }
+
+    .wm-item {
+      padding: 4px 8px;
+      font-size: 10.5px;
+      color: var(--dim);
+      cursor: pointer;
+      transition: background .12s;
+    }
+
+    .wm-item:hover {
+      background: var(--bg3);
+      color: var(--text);
+    }
+
+    .win-content {
+      padding: 10px;
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .wlist {
+      border: 1px solid var(--line);
+      overflow-y: auto;
+      flex-shrink: 0;
+      background: var(--bg);
+    }
+
+    .wlist::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .wlist::-webkit-scrollbar-thumb {
+      background: var(--line2);
+    }
+
+    .wlist-hdr {
+      padding: 4px 10px;
+      display: flex;
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 500;
+      color: var(--dimmer);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--line);
+      background: var(--bg3);
+    }
+
+    .wrow {
+      padding: 6px 10px;
+      font-size: 11px;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--bg3);
+      transition: background .1s;
+    }
+
+    .wrow:last-child {
+      border-bottom: none;
+    }
+
+    .wrow:hover {
+      background: var(--bg2);
+    }
+
+    .wrow.sel {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .wrow.deleted {
+      color: var(--dimmer);
+      cursor: not-allowed;
+      text-decoration: line-through;
+    }
+
+    .wrow.unread {
+      font-weight: 500;
+    }
+
+    .unread-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #111;
+      flex-shrink: 0;
+    }
+
+    .wtxt {
+      border: 1px solid var(--line);
+      background: var(--bg);
+      padding: 10px;
+      font-family: var(--mono);
+      font-size: 11px;
+      line-height: 1.8;
+      color: var(--text);
+      white-space: pre-wrap;
+      overflow-y: auto;
+    }
+
+    .wtxt::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .wtxt::-webkit-scrollbar-thumb {
+      background: var(--line2);
+    }
+
+    .wtxt-meta {
+      font-size: 9.5px;
+      color: var(--dimmer);
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      line-height: 2;
+    }
+
+    .wnote {
+      width: 100%;
+      flex: 1;
+      min-height: 100px;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      padding: 9px 10px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 300;
+      color: var(--text);
+      resize: none;
+      outline: none;
+      line-height: 1.75;
+      caret-color: var(--ink);
+    }
+
+    .wnote:focus {
+      border-color: var(--ink);
+    }
+
+    .wnote::placeholder {
+      color: var(--dimmer);
+    }
+
+    .wstatus {
+      display: flex;
+      gap: 6px;
+      padding: 5px 10px;
+      font-family: var(--mono);
+      font-size: 9.5px;
+      color: var(--dimmer);
+      border-top: 1px solid var(--line);
+      background: var(--bg2);
+      flex-shrink: 0;
+    }
+
+    .wstatus-cell {
+      border: 1px solid var(--line);
+      padding: 1px 7px;
+      background: var(--bg);
+    }
+
+    .walert {
+      border: 1px solid #000;
+      border-left: 3px solid #000;
+      background: var(--bg3);
+      padding: 6px 10px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text);
+    }
+
+    .walert.red {
+      border-color: #c00;
+      border-left-color: #c00;
+      color: #c00;
+      background: #fff5f5;
+    }
+
+    /* Terminal */
+    .term-body {
+      background: var(--ink);
+      color: #e8e8e8;
+      border: 1px solid var(--line2);
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 10px;
+      flex: 1;
+      overflow-y: auto;
+      line-height: 1.65;
+      min-height: 150px;
+    }
+
+    .term-body::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .term-body::-webkit-scrollbar-thumb {
+      background: #444;
+    }
+
+    .term-prompt {
+      color: #fff;
+      font-weight: 500;
+    }
+
+    .term-out-err {
+      color: #ff6b6b;
+    }
+
+    .term-out-ok {
+      color: #aaffaa;
+    }
+
+    .term-out-info {
+      color: #aaaaff;
+    }
+
+    .term-out-mind {
+      color: #f0d080;
+    }
+
+    .term-input-row {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--ink);
+      border-top: none;
+      background: #111;
+      padding: 6px 10px;
+      flex-shrink: 0;
+      gap: 5px;
+    }
+
+    .term-input {
+      background: transparent;
+      color: #e8e8e8;
+      font-family: var(--mono);
+      font-size: 11px;
+      border: none;
+      outline: none;
+      flex: 1;
+      caret-color: #fff;
+    }
+
+    /* Dock */
+    .dock-wrap {
+      height: 54px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-top: 1px solid var(--ink);
+      background: var(--bg2);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 200;
+    }
+
+    .dock {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .dock-sep {
+      width: 1px;
+      height: 30px;
+      background: var(--line2);
+      margin: 0 6px;
+    }
+
+    .dock-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      cursor: pointer;
+      position: relative;
+      padding: 4px 8px;
+      border: 1px solid transparent;
+      transition: border-color .12s, background .12s;
+    }
+
+    .dock-item:hover {
+      border-color: var(--ink);
+      background: var(--bg3);
+    }
+
+    .dock-icon {
+      font-size: 20px;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dock-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--ink);
+      opacity: 0;
+      transition: opacity .2s;
+    }
+
+    .dock-dot.on {
+      opacity: 1;
+    }
+
+    .dock-label {
+      position: absolute;
+      bottom: 46px;
+      background: var(--ink);
+      color: #fff;
+      font-family: var(--mono);
+      font-size: 9px;
+      padding: 2px 8px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .12s;
+    }
+
+    .dock-item:hover .dock-label {
+      opacity: 1;
+    }
+
+    .win-resize {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 14px;
+      height: 14px;
+      cursor: se-resize;
+      background: linear-gradient(135deg, transparent 50%, var(--line2) 50%);
+    }
+
+    /* modal overlay for locked files */
+    .locked-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .55);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .locked-overlay.show {
+      display: flex;
+    }
+
+    .locked-box {
+      background: #fff;
+      border: 2px solid #000;
+      box-shadow: 4px 4px 0 #000;
+      padding: 28px 32px;
+      max-width: 320px;
+      text-align: center;
+      font-family: var(--mono);
+    }
+
+    .locked-box h3 {
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    .locked-box p {
+      font-size: 11px;
+      color: var(--dim);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+
+    .locked-box button {
+      border: 1px solid #000;
+      background: #000;
+      color: #fff;
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 5px 18px;
+      cursor: pointer;
+    }
+
+    .locked-box button:hover {
+      background: #333;
+    }
+
+    /* important.log popup */
+    .imp-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .72);
+      z-index: 99999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .imp-overlay.show {
+      display: flex;
+      animation: fadein .3s ease;
+    }
+
+    @keyframes fadein {
+      from {
+        opacity: 0
+      }
+
+      to {
+        opacity: 1
+      }
+    }
+
+    .imp-box {
+      background: #000;
+      border: 1px solid #ff2222;
+      box-shadow: 0 0 40px rgba(255, 30, 30, .3), 4px 4px 0 #ff2222;
+      padding: 32px 36px;
+      max-width: 360px;
+      width: 90%;
+      font-family: var(--mono);
+      color: #e8e8e8;
+    }
+
+    .imp-box-title {
+      font-size: 13px;
+      color: #ff4444;
+      font-weight: 500;
+      margin-bottom: 4px;
+      letter-spacing: .05em;
+    }
+
+    .imp-box-sub {
+      font-size: 9px;
+      color: #666;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .imp-box-body {
+      font-size: 11px;
+      color: #ccc;
+      line-height: 1.8;
+      margin-bottom: 24px;
+    }
+
+    .imp-box-timer {
+      font-size: 10px;
+      color: #555;
+      margin-bottom: 16px;
+    }
+
+    .imp-box-timer span {
+      color: #ff4444;
+      font-weight: 500;
+    }
+
+    .imp-box-btn {
+      border: 1px solid #ff2222;
+      background: transparent;
+      color: #ff4444;
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 6px 20px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+
+    .imp-box-btn:hover {
+      background: rgba(255, 30, 30, .1);
+    }
+
+    .imp-box-btn.imp-yes {
+      border-color: #aaffaa;
+      color: #aaffaa;
+    }
+
+    .imp-box-btn.imp-yes:hover {
+      background: rgba(100, 255, 100, .08);
+    }
+
+    .imp-box-btn.imp-no {
+      border-color: #555;
+      color: #777;
+    }
+
+    .imp-box-btn.imp-no:hover {
+      background: rgba(255, 255, 255, .04);
+    }
+
+    .imp-name-field {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid #444;
+      color: #e8e8e8;
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 300;
+      padding: 8px 2px;
+      outline: none;
+      margin-top: 8px;
+      caret-color: #aaffaa;
+      letter-spacing: .04em;
+      text-align: right;
+      direction: rtl;
+    }
+
+    .imp-name-field::placeholder {
+      color: #333;
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--line2);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="bg"></div>
+
+  <!-- Locked file modal -->
+  <div class="locked-overlay" id="locked-modal">
+    <div class="locked-box">
+      <h3>⛔ ACCESS DENIED</h3>
+      <p id="locked-msg">This file is encrypted or corrupted.<br>You do not have permission to open it.</p>
+      <button onclick="document.getElementById('locked-modal').classList.remove('show')">Close</button>
+    </div>
+  </div>
+
+  <!-- important.log choice popup -->
+  <div class="imp-overlay" id="imp-modal">
+    <div class="imp-box" id="imp-box-inner">
+      <!-- Step 1: the question -->
+      <div id="imp-step1">
+        <div class="imp-box-title">⚠ I have viewed the file</div>
+        <div class="imp-box-sub">important.log — accessed — node: nova.local — mar 16 1996</div>
+        <div class="imp-box-body"> You have information that could end this case.<br><br> balla is selling company
+          data.<br> You have the evidence.<br><br>
+          <span style="color:#888;">Do you want to tell the investigator?</span>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:4px;">
+          <button class="imp-box-btn imp-yes" onclick="impChooseYes()">Yes — Tell the investigator</button>
+          <button class="imp-box-btn imp-no" onclick="impChooseNo()">No — I ignore it</button>
+        </div>
+      </div>
+      <!-- Step 2: name input (shown after YES) -->
+      <div id="imp-step2" style="display:none;">
+        <div class="imp-box-title" style="color:#aaffaa;">✓ Right decision</div>
+        <div class="imp-box-sub">Sending report to investigator...</div>
+        <div class="imp-box-body">Your identity has been recorded.<br>You will be transferred in seconds.</div>
+      </div>
+      <!-- Step 3: no message -->
+      <div id="imp-step3" style="display:none;">
+        <div class="imp-box-title">Too late.</div>
+        <div class="imp-box-sub">decision logged — no action taken</div>
+        <div class="imp-box-body" style="color:#888;"> You chose silence.<br><br> But the file was read. And the system
+          knows.<br> There is no way to undo now.<br><br>
+          <span style="color:#555;">The session will close automatically...</span>
+        </div>
+        <div class="imp-box-timer">Closing in <span id="imp-no-cd">5</span>s</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;height:100vh;position:relative;z-index:1;">
+
+    <!-- Menubar -->
+    <div class="menubar">
+      <div class="mb-logo">⌘</div>
+      <div class="mb-item" style="font-weight:500;color:#fff">Finder</div>
+      <div class="mb-item">File</div>
+      <div class="mb-item">Edit</div>
+      <div class="mb-item">View</div>
+      <div class="mb-item">Window</div>
+      <div class="mb-item">Help</div>
+      <div class="mb-right">
+        <div class="ws-pill">
+          <div class="ws-dot on"></div>
+          <div class="ws-dot"></div>
+          <div class="ws-dot"></div>
+        </div>
+        <div class="mb-clock" id="top-clock">--:--</div>
+      </div>
+    </div>
+
+    <!-- Desktop area -->
+    <div class="desktop-area" id="desk">
+
+      <!-- Icons -->
+      <div class="icon-col">
+        <div class="dicon" ondblclick="openWin('note')">
+          <div class="dicon-img">📝</div>
+          <div class="dicon-label">Notes</div>
+        </div>
+        <div class="dicon" ondblclick="openWin('email')">
+          <div class="dicon-img">📧</div>
+          <div class="dicon-label">Mail</div>
+        </div>
+        <div class="dicon" ondblclick="openWin('files')">
+          <div class="dicon-img">📂</div>
+          <div class="dicon-label">Finder</div>
+        </div>
+        <div class="dicon" ondblclick="openWin('terminal')">
+          <div class="dicon-img">🖥</div>
+          <div class="dicon-label">Terminal</div>
+        </div>
+      </div>
+
+      <!-- ══ NOTEPAD ══ -->
+      <div class="win" id="win-note" style="width:440px;top:40px;left:140px;">
+        <div class="win-bar" id="bar-note">
+          <div class="traffic-lights">
+            <div class="tl tl-close" onclick="closeWin('note')"></div>
+            <div class="tl tl-min"></div>
+            <div class="tl tl-max"></div>
+          </div>
+          <div class="win-title">Notes</div>
+        </div>
+        <div class="win-menu">
+          <div class="wm-item">File</div>
+          <div class="wm-item">Edit</div>
+          <div class="wm-item">Format</div>
+          <div class="wm-item">View</div>
+        </div>
+        <div class="win-content">
+          <div class="wlist" style="height:175px;overflow-y:auto;">
+            <div class="wlist-hdr"><span>Filename</span><span style="margin-left:auto">Modified</span><span
+                style="margin-left:16px">Size</span></div>
+            <div class="wrow" onclick="openNote('everyday',this)">📄 everyday.txt <span
+                style="margin-left:auto;font-size:9px;color:var(--dimmer)">Mar 16 1996 &nbsp; 188 B</span></div>
+            <div class="wrow" onclick="openNote('slash',this)">📄 / <span
+                style="margin-left:auto;font-size:9px;color:var(--dimmer)">Mar 16 1996 &nbsp; 312 B</span></div>
+            <div class="wrow" onclick="openNote('task',this)">📄 task.txt <span
+                style="margin-left:auto;font-size:9px;color:var(--dimmer)">Mar 14 1996 &nbsp; 198 B</span></div>
+            <div class="wrow" onclick="openNote('job',this)">📄 job.txt <span
+                style="margin-left:auto;font-size:9px;color:var(--dimmer)">Mar 12 1996 &nbsp; 354 B</span></div>
+            <!-- Deleted section -->
+            <div
+              style="padding:3px 10px;font-family:var(--mono);font-size:9px;font-weight:500;color:var(--dimmer);letter-spacing:.1em;text-transform:uppercase;border-top:1px dashed var(--line2);border-bottom:1px solid var(--line);background:var(--bg3);display:flex;align-items:center;gap:6px;">
+              <span style="opacity:.5">🗑</span> Deleted Files
+            </div>
+            <div class="wrow note-deleted" onclick="openNoteDeleted('imp',this)" title="Recover and open">
+              <span style="text-decoration:line-through;opacity:.55">📄 imp.txt</span>
+              <span
+                style="margin-left:4px;font-size:8px;color:#c00;border:1px solid #c00;padding:0 4px;border-radius:2px;">DEL</span>
+              <span style="margin-left:auto;font-size:9px;color:var(--dimmer)">Mar 16 1996 &nbsp; 277 B</span>
+            </div>
+          </div>
+          <textarea class="wnote" id="note-body" placeholder="select a file to open…" readonly></textarea>
+        </div>
+        <div class="wstatus">
+          <div class="wstatus-cell" id="note-stat">No file</div>
+          <div class="wstatus-cell">Ln 1 Col 1</div>
+          <div class="wstatus-cell" id="note-sz">0 B</div>
+        </div>
+        <div class="win-resize"></div>
+      </div>
+
+      <!-- ══ MAIL ══ -->
+      <div class="win" id="win-email" style="width:560px;top:60px;left:180px;">
+        <div class="win-bar" id="bar-email">
+          <div class="traffic-lights">
+            <div class="tl tl-close" onclick="closeWin('email')"></div>
+            <div class="tl tl-min"></div>
+            <div class="tl tl-max"></div>
+          </div>
+          <div class="win-title">Mail — Inbox</div>
+        </div>
+        <div class="win-menu">
+          <div class="wm-item">Mailbox</div>
+          <div class="wm-item">Message</div>
+          <div class="wm-item">View</div>
+          <div class="wm-item">Compose</div>
+        </div>
+        <div class="win-content">
+          <div style="display:flex;gap:8px;flex:1;">
+            <div class="wlist" style="width:155px;flex-shrink:0;height:210px;overflow-y:auto;">
+              <div class="wlist-hdr"><span>From</span></div>
+              <div class="wrow unread" onclick="readMail('marya',this)">
+                <div class="unread-dot"></div>📩 marya
+              </div>
+              <div class="wrow unread" onclick="readMail('aj',this)">
+                <div class="unread-dot"></div>📩 a.g
+              </div>
+              <div class="wrow deleted" onclick="showDeleted('balla')">📩 balla</div>
+              <div class="wrow deleted" onclick="showDeleted('unknown')">⚠ unknown</div>
+            </div>
+            <div class="wtxt" id="mail-body" style="flex:1;height:210px;">
+              <span style="color:var(--dimmer)">// select a message //</span>
+            </div>
+          </div>
+        </div>
+        <div class="wstatus">
+          <div class="wstatus-cell">4 messages · 2 unread</div>
+          <div class="wstatus-cell" id="mail-stat">No selection</div>
+        </div>
+        <div class="win-resize"></div>
+      </div>
+
+      <!-- ══ FILES ══ -->
+      <div class="win" id="win-files" style="width:430px;top:80px;left:230px;">
+        <div class="win-bar" id="bar-files">
+          <div class="traffic-lights">
+            <div class="tl tl-close" onclick="closeWin('files')"></div>
+            <div class="tl tl-min"></div>
+            <div class="tl tl-max"></div>
+          </div>
+          <div class="win-title">Finder — /home/user</div>
+        </div>
+        <div class="win-menu">
+          <div class="wm-item">File</div>
+          <div class="wm-item">Edit</div>
+          <div class="wm-item">View</div>
+          <div class="wm-item">Go</div>
+        </div>
+        <div class="win-content">
+          <div style="font-family:var(--mono);font-size:9.5px;color:var(--dimmer);padding:2px 0;">/home/user/</div>
+          <div class="wlist" style="flex:1;">
+            <div class="wlist-hdr">
+              <span>Name</span>
+              <span style="margin-left:auto">Size</span>
+              <span style="margin-left:24px">Modified</span>
+              <span style="margin-left:24px">Perm</span>
+            </div>
+            <div class="wrow" style="justify-content:space-between"><span>📁 Desktop/</span><span
+                style="font-family:var(--mono);font-size:9px;color:var(--dimmer)">— &nbsp; Mar 16 1996 &nbsp;
+                drwxr-xr-x</span></div>
+            <div class="wrow" style="justify-content:space-between"><span>📁 Documents/</span><span
+                style="font-family:var(--mono);font-size:9px;color:var(--dimmer)">— &nbsp; Mar 01 1996 &nbsp;
+                drwxr-xr-x</span></div>
+            <div class="wrow" style="justify-content:space-between"><span>📁 Downloads/</span><span
+                style="font-family:var(--mono);font-size:9px;color:var(--dimmer)">— &nbsp; Feb 28 1996 &nbsp;
+                drwxr-xr-x</span></div>
+            <div class="wrow" style="justify-content:space-between"><span>📄 .bashrc</span><span
+                style="font-family:var(--mono);font-size:9px;color:var(--dimmer)">856 B &nbsp; Mar 10 1996 &nbsp;
+                -rw-r--r--</span></div>
+            <div class="wrow" style="justify-content:space-between"><span>📄 .profile</span><span
+                style="font-family:var(--mono);font-size:9px;color:var(--dimmer)">1.2 KB &nbsp; Apr 01 1996 &nbsp;
+                -rw-r--r--</span></div>
+            <div class="wrow" style="justify-content:space-between"><span>📄 .bash_history</span><span
+                style="font-family:var(--mono);font-size:9px;color:var(--dimmer)">2.4 KB &nbsp; Mar 16 1996 &nbsp;
+                -rw-------</span></div>
+            <div class="wrow" style="justify-content:space-between"><span>📄 .bash_logout</span><span
+                style="font-family:var(--mono);font-size:9px;color:var(--dimmer)">512 B &nbsp; Jan 12 1996 &nbsp;
+                -rw-r--r--</span></div>
+          </div>
+        </div>
+        <div class="wstatus">
+          <div class="wstatus-cell">7 items</div>
+          <div class="wstatus-cell">~4.9 KB</div>
+          <div class="wstatus-cell">/home/user</div>
+        </div>
+        <div class="win-resize"></div>
+      </div>
+
+      <!-- ══ TERMINAL ══ -->
+      <div class="win" id="win-terminal" style="width:530px;top:45px;left:155px;">
+        <div class="win-bar" id="bar-terminal">
+          <div class="traffic-lights">
+            <div class="tl tl-close" onclick="closeWin('terminal')"></div>
+            <div class="tl tl-min"></div>
+            <div class="tl tl-max"></div>
+          </div>
+          <div class="win-title">Terminal — zsh</div>
+        </div>
+        <div class="win-content">
+          <div class="term-body" id="term-out">
+            <div><span style="color:#fff;font-weight:500;">H-trace</span> — version 28.0.0</div>
+            <div style="color:#666;font-size:10px;">Type <span style="color:#aaa">help</span> for available commands.
+            </div>
+            <div style="margin-top:6px;"></div>
+          </div>
+          <div class="term-input-row">
+            <span class="term-prompt" id="term-ps1">user@H-trace /home/user %&nbsp;</span>
+            <input class="term-input" id="term-in" autocomplete="off" spellcheck="false" onkeydown="termKey(event)" />
+          </div>
+        </div>
+        <div class="win-resize"></div>
+      </div>
+
+      <!-- ══ TRASH ══ -->
+      <div class="win" id="win-trash" style="width:430px;top:100px;left:220px;">
+        <div class="win-bar" id="bar-trash">
+          <div class="traffic-lights">
+            <div class="tl tl-close" onclick="closeWin('trash')"></div>
+            <div class="tl tl-min"></div>
+            <div class="tl tl-max"></div>
+          </div>
+          <div class="win-title">Trash</div>
+        </div>
+        <div class="win-menu">
+          <div class="wm-item">File</div>
+          <div class="wm-item">View</div>
+          <div class="wm-item" style="color:#c00;" onclick="alert('Trash is already being managed by the system.')">
+            Empty Trash</div>
+        </div>
+        <div class="win-content">
+          <div class="walert">Items in Trash cannot be recovered after system flush.</div>
+          <div class="wlist" style="flex:1;">
+            <div class="wlist-hdr">
+              <span>Name</span>
+              <span style="margin-left:auto">Deleted</span>
+              <span style="margin-left:24px">Origin</span>
+            </div>
+            <div class="wrow" style="justify-content:space-between;color:var(--dim);cursor:pointer;"
+              onclick="showLocked('important.log (deleted copy) — file data is corrupted or wiped.')">
+              <span>🗑 important.log(copy 1)</span>
+              <span style="font-family:var(--mono);font-size:9px;color:var(--dimmer)">Mar 16 1996 &nbsp;
+                /home/user/.mind/</span>
+            </div>
+            <div class="wrow" style="justify-content:space-between;color:var(--dim);cursor:pointer;"
+              onclick="showLocked('.shadow (deleted copy) — decryption key missing.')">
+              <span>🗑 .shadow(copy 1)</span>
+              <span style="font-family:var(--mono);font-size:9px;color:var(--dimmer)">Mar 16 1996 &nbsp;
+                /home/user/.mind/</span>
+            </div>
+          </div>
+        </div>
+        <div class="wstatus">
+          <div class="wstatus-cell">2 items</div>
+          <div class="wstatus-cell">~5.1 KB total</div>
+        </div>
+        <div class="win-resize"></div>
+      </div>
+
+    </div><!-- /desktop-area -->
+
+    <!-- Dock -->
+    <div class="dock-wrap">
+      <div class="dock">
+        <div class="dock-item" ondblclick="openWin('note')">
+          <div class="dock-icon">📝</div>
+          <div class="dock-label">Notes</div>
+          <div class="dock-dot" id="dot-note"></div>
+        </div>
+        <div class="dock-item" ondblclick="openWin('email')">
+          <div class="dock-icon">📧</div>
+          <div class="dock-label">Mail</div>
+          <div class="dock-dot" id="dot-email"></div>
+        </div>
+        <div class="dock-item" ondblclick="openWin('files')">
+          <div class="dock-icon">📂</div>
+          <div class="dock-label">Finder</div>
+          <div class="dock-dot" id="dot-files"></div>
+        </div>
+        <div class="dock-item" ondblclick="openWin('terminal')">
+          <div class="dock-icon">🖥</div>
+          <div class="dock-label">Terminal</div>
+          <div class="dock-dot" id="dot-terminal"></div>
+        </div>
+        <div class="dock-sep"></div>
+        <div class="dock-item" ondblclick="openWin('trash')">
+          <div class="dock-icon">🗑</div>
+          <div class="dock-label">Trash</div>
+          <div class="dock-dot" id="dot-trash"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="../storage.js"></script>
+  <script src="desk.js"></script>
+</body>
+
+</html>
